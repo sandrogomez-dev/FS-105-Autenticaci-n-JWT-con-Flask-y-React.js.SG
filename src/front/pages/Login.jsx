@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Context } from '../store.js';
+import { Context } from '../hooks/useGlobalReducer.jsx';
 import { loginUser } from '../services/user.js';
 
 export const Login = () => {

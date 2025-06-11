@@ -5,10 +5,11 @@ import os
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
+from flask_cors import CORS
 from api.utils import APIException, generate_sitemap
 from api.models import db, bcrypt
 from api.routes import api
-from api.admin import setup_admin
+# from api.admin import setup_admin  # Comentado para evitar conflictos de dependencias
 from api.commands import setup_commands
 
 # from models import Person
@@ -18,6 +19,9 @@ static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../dist/')
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+
+# Enable CORS for all domains and routes
+CORS(app)
 
 # JWT Configuration
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'your-secret-key-change-in-production')
@@ -38,7 +42,7 @@ db.init_app(app)
 bcrypt.init_app(app)
 
 # add the admin
-setup_admin(app)
+# setup_admin(app)  # Comentado para evitar conflictos
 
 # add the admin
 setup_commands(app)
@@ -60,16 +64,16 @@ def handle_invalid_usage(error):
 def sitemap():
     if ENV == "development":
         return generate_sitemap(app)
-    return send_from_directory(static_file_dir, 'index.html')
+    return {"message": "JWT Auth API is running", "endpoints": "/api/*"}
 
-# any other endpoint will try to serve it like a static file
-@app.route('/<path:path>', methods=['GET'])
-def serve_any_other_file(path):
-    if not os.path.isfile(os.path.join(static_file_dir, path)):
-        path = 'index.html'
-    response = send_from_directory(static_file_dir, path)
-    response.cache_control.max_age = 0  # avoid cache memory
-    return response
+# Commented out to avoid serving frontend files from backend
+# @app.route('/<path:path>', methods=['GET'])
+# def serve_any_other_file(path):
+#     if not os.path.isfile(os.path.join(static_file_dir, path)):
+#         path = 'index.html'
+#     response = send_from_directory(static_file_dir, path)
+#     response.cache_control.max_age = 0  # avoid cache memory
+#     return response
 
 
 # this only runs if `$ python src/main.py` is executed
